@@ -43,3 +43,12 @@ BEGIN
 
 
 END
+------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE DEFINER=`root`@`localhost` FUNCTION `numeros_letras`(letra varchar(90)) RETURNS int
+    READS SQL DATA
+BEGIN
+	declare numero int;
+    select count(*) into numero from articulos where marca like concat('%',letra,'%');
+    return numero;
+
+END
