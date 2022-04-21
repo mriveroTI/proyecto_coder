@@ -1,0 +1,45 @@
+CREATE DEFINER=`root`@`localhost` FUNCTION `beneficio_costo_pvp`(costo INT, pvp INT) RETURNS int
+    READS SQL DATA
+BEGIN
+  DECLARE beneficio INT;
+    SET beneficio = pvp - costo;
+    RETURN beneficio; 
+
+END
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE DEFINER=`root`@`localhost` FUNCTION `status_stock`(stock int) RETURNS varchar(30) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+declare tipo varchar(30);
+
+case
+ when stock<15 then
+ set tipo='bajo';
+ when sueldo<30 then
+ set tipo='medio';
+ else
+ set tipo='alto';
+end case;
+
+RETURN tipo;
+END
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE DEFINER=`root`@`localhost` FUNCTION `tiempo_diferencia`(fecha_de_compra date, fecha_ingreso date) RETURNS varchar(200) CHARSET utf8mb4
+    READS SQL DATA
+BEGIN
+		declare diferencia varchar (60);
+		declare resultado varchar(200);
+		set diferencia = datediff(fecha_de_compra,fecha_ingreso);
+		
+        if diferencia is null then
+		set resultado = 'No tiene fecha';
+        
+        else 
+		set resultado = concat( diferencia,' ','días');
+        
+    end if;
+    
+    return resultado;
+
+
+END
