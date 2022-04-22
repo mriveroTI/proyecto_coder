@@ -1,0 +1,25 @@
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERTAR_Cliente`(
+`_id_cliente`				    int,
+`_nombre`					 	VARCHAR(30),
+`_apellido`						CHAR(60),
+`_telefono`			 			INT,
+`_email`					 	VARCHAR(80)		
+)
+BEGIN
+   
+   INSERT INTO cliente
+        (id_cliente,nombre,apellido,telefono,email)
+    values
+        (_id_cliente, _nombre, _apellido, _telefono, _email);
+        
+   select LAST_INSERT_ID() as ultimo_id;
+        
+END
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+--eliminar  
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_Eliminar_1`(IN id int)
+begin 
+delete from cliente where id_cliente=id;
+END
