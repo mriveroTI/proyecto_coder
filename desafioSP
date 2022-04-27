@@ -1,3 +1,25 @@
+-- ORDENAR LOS ARTICULOS EN FORMA ASCENDENTE Y DESCENDENTE 
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ordenar`(IN buscar VARCHAR(20), IN tipo VARCHAR(5))
+BEGIN
+    
+    SET @order_type = (tipo);
+    
+    IF @order_type = 'DESC' OR @order_type = 'ASC' THEN
+		SET @expression = CONCAT('SELECT * FROM articulos ORDER BY ', @sql_order,' ', @order_type);
+        
+        PREPARE ordered_query FROM @expression;
+		EXECUTE ordered_query;
+		DEALLOCATE PREPARE ordered_query;
+	ELSE 
+		SELECT 'Error: Ingrese nuevamente los campos' AS 'Error' FROM dual;
+	END IF;
+     
+END
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+--CREAR UN CLIENTE EN MI TABLA 
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERTAR_Cliente`(
 `_id_cliente`				    int,
 `_nombre`					 	VARCHAR(30),
