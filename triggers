@@ -1,0 +1,60 @@
+-- Borrar y registrar
+
+DELIMITER //
+
+create trigger log_tabla_articulos_borrar BEFORE delete on articulos
+
+for each row begin
+
+insert into acciones(accion)
+
+value (concat ('Se borro un nuevo Articulo de marca   ',old.marca, '  y id  ', old.id_articulo));
+
+END//
+
+DELIMITER ;
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+-- Actualizar y registrar
+
+delimiter $$
+
+-- nombre del trigger
+create trigger before_update
+-- en que momento puede ser un after delete tambien 
+before update 
+-- sobre que tabla
+on sucursales
+-- cantidad de veces
+for each row
+begin
+	insert into update_logs
+    values
+    (null,
+    user(),
+    now(),
+    concat_ws('-',old.id_sucursal,old.id_deposito));
+    
+end
+$$
+
+----------------------------------------------------------------------------------------------------------------
+
+-- MODIFICO DATO Y ACTUALIZO OTRA COLUMNA auto.
+
+DELIMITER $$
+CREATE TRIGGER ‘actualizarPrecio_Articulos’
+BEFORE UPDATE ON ‘articulos’
+FOR EACH ROW
+BEGIN
+  IF NEW.costo <> OLD.costo
+    THEN
+      SET NEW.pvp = NEW.costo * 2;
+  END IF ;
+END$$
+DELIMITER ;
+
+
