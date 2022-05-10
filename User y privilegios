@@ -1,0 +1,22 @@
+--CREACION DE USUARIOS MYSQL
+
+CREATE USER 'mrivero'@'localhost' IDENTIFIED BY 'password'; -- crea usuario 
+
+	GRANT SELECT -- da permisos de lectura
+    ON retail_empresa.*
+    TO 'mrivero'@'localhost';
+    
+CREATE USER 'instalador'@'localhost' IDENTIFIED BY 'password'; -- crea usuario
+	
+    GRANT SELECT, INSERT, UPDATE, CREATE -- da al usuarios permisos lectura y modificacion de registros
+    ON retail_empresa.*
+    TO 'instalador'@'localhost';
+    
+    FLUSH PRIVILEGES; -- REFRESCA LOS PRIVILEGIOS ANTERIORMENTE APLICADOS
+    
+    
+    PARA VER LA LISTA DE USUARIOS SERIA 
+    
+    SELECT USER FROM mysql.user; 
+    
+    
