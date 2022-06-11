@@ -1,0 +1,537 @@
+
+
+-- -----------------------------------------------------
+-- Crear base retail_empresa
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `retail_empresa` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `retail_empresa` ;
+
+-- -----------------------------------------------------
+-- Crear tabla ACCIONES (TABLA DE LOGS)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`acciones` (
+  `idacciones` INT NOT NULL AUTO_INCREMENT,
+  `accion` VARCHAR(200) NULL DEFAULT NULL,
+  `fecha` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  `user` VARCHAR(200) NULL DEFAULT NULL,
+  PRIMARY KEY (`idacciones`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 38
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA ARTICULOS
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`articulos` (
+  `id_articulo` VARCHAR(90) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci' NOT NULL,
+  `marca` VARCHAR(90) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci' NULL DEFAULT NULL,
+  `coleccion_verano` CHAR(2) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci' NULL DEFAULT NULL,
+  `coleccion_invierno` CHAR(2) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci' NULL DEFAULT NULL,
+  `outlet` VARCHAR(2) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_0900_ai_ci' NOT NULL,
+  `stock` INT NOT NULL,
+  `fecha_de_compra` DATE NULL DEFAULT NULL,
+  `fecha_ingreso` DATE NULL DEFAULT NULL,
+  `costo` INT NOT NULL,
+  `pvp` INT NOT NULL,
+  PRIMARY KEY (`id_articulo`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA CLIENTE
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`cliente` (
+  `id_cliente` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(30) NULL DEFAULT NULL,
+  `apellido` CHAR(60) NULL DEFAULT NULL,
+  `telefono` INT NULL DEFAULT NULL,
+  `email` VARCHAR(80) NULL DEFAULT NULL,
+  PRIMARY KEY (`id_cliente`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 12
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA PROVEEDORES
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`proveedores` (
+  `id_proveedor` INT NOT NULL,
+  `cuit` INT NULL DEFAULT NULL,
+  `marca` TEXT NULL DEFAULT NULL,
+  `telefono` INT NULL DEFAULT NULL,
+  `pais` TEXT NULL DEFAULT NULL,
+  `mail` TEXT NULL DEFAULT NULL,
+  PRIMARY KEY (`id_proveedor`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA DEPOSITOS
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`depositos` (
+  `id_deposito` INT NOT NULL AUTO_INCREMENT,
+  `direccion` VARCHAR(50) NULL DEFAULT NULL,
+  `stock` INT NULL DEFAULT NULL,
+  `id_sucursal` INT NULL DEFAULT NULL,
+  `proveedores_id_proveedor` INT NOT NULL,
+  PRIMARY KEY (`id_deposito`),
+  CONSTRAINT `fk_depositos_proveedores1`
+    FOREIGN KEY (`proveedores_id_proveedor`)
+    REFERENCES `retail_empresa`.`proveedores` (`id_proveedor`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 7
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE INDEX `fk_depositos_proveedores1_idx` ON `retail_empresa`.`depositos` (`proveedores_id_proveedor` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA SUCURSALES
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`sucursales` (
+  `id_sucursal` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(30) NULL DEFAULT NULL,
+  `direccion` VARCHAR(90) NULL DEFAULT NULL,
+  `Telefono` INT NULL DEFAULT NULL,
+  `Ciudad` VARCHAR(50) NULL DEFAULT NULL,
+  `Codigo_Postal` VARCHAR(8) NULL DEFAULT NULL,
+  `id_deposito` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`id_sucursal`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 6
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA VENTA
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`venta` (
+  `id_factura` INT NOT NULL AUTO_INCREMENT,
+  `fecha` TEXT NULL DEFAULT NULL,
+  `cliente_id_cliente` INT NOT NULL,
+  PRIMARY KEY (`id_factura`),
+  CONSTRAINT `fk_venta_cliente`
+    FOREIGN KEY (`cliente_id_cliente`)
+    REFERENCES `retail_empresa`.`cliente` (`id_cliente`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 6
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE INDEX `fk_venta_cliente_idx` ON `retail_empresa`.`venta` (`cliente_id_cliente` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA DETALLE DE FACTURA
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`detalle_factura` (
+  `sucursales_id_sucursal` INT NOT NULL,
+  `venta_id_factura` INT NOT NULL,
+  `fecha` DATE NULL DEFAULT NULL,
+  `TOTAL` FLOAT NULL DEFAULT NULL,
+  `RUT` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`sucursales_id_sucursal`, `venta_id_factura`),
+  CONSTRAINT `fk_sucursales_has_venta_sucursales1`
+    FOREIGN KEY (`sucursales_id_sucursal`)
+    REFERENCES `retail_empresa`.`sucursales` (`id_sucursal`),
+  CONSTRAINT `fk_sucursales_has_venta_venta1`
+    FOREIGN KEY (`venta_id_factura`)
+    REFERENCES `retail_empresa`.`venta` (`id_factura`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE UNIQUE INDEX `RUT_UNIQUE` ON `retail_empresa`.`detalle_factura` (`RUT` ASC) VISIBLE;
+
+CREATE INDEX `fk_sucursales_has_venta_venta1_idx` ON `retail_empresa`.`detalle_factura` (`venta_id_factura` ASC) VISIBLE;
+
+CREATE INDEX `fk_sucursales_has_venta_sucursales1_idx` ON `retail_empresa`.`detalle_factura` (`sucursales_id_sucursal` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLE MOV_MERCADERIA
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`mov_mercaderia` (
+  `id_remito` INT NOT NULL AUTO_INCREMENT,
+  `fecha` DATE NULL DEFAULT NULL,
+  `estado` TEXT NULL DEFAULT NULL,
+  `fecha_recibido` DATE NULL DEFAULT NULL,
+  `remitos_entregados` VARCHAR(45) NULL DEFAULT NULL,
+  `id_deposito` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`id_remito`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 8
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE UNIQUE INDEX `id_remito_UNIQUE` ON `retail_empresa`.`mov_mercaderia` (`id_remito` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA PUENTE DE MOVIMIENTOS POR DEPOSITOS
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`mov_mercaderia_por_depositos` (
+  `mov_mercaderia_id_remito` INT NOT NULL,
+  `depositos_id_deposito` INT NOT NULL,
+  PRIMARY KEY (`mov_mercaderia_id_remito`, `depositos_id_deposito`),
+  CONSTRAINT `fk_mov_mercaderia_has_depositos_depositos1`
+    FOREIGN KEY (`depositos_id_deposito`)
+    REFERENCES `retail_empresa`.`depositos` (`id_deposito`),
+  CONSTRAINT `fk_mov_mercaderia_has_depositos_mov_mercaderia1`
+    FOREIGN KEY (`mov_mercaderia_id_remito`)
+    REFERENCES `retail_empresa`.`mov_mercaderia` (`id_remito`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE INDEX `fk_mov_mercaderia_has_depositos_depositos1_idx` ON `retail_empresa`.`mov_mercaderia_por_depositos` (`depositos_id_deposito` ASC) VISIBLE;
+
+CREATE INDEX `fk_mov_mercaderia_has_depositos_mov_mercaderia1_idx` ON `retail_empresa`.`mov_mercaderia_por_depositos` (`mov_mercaderia_id_remito` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA REMITO_SUCURSALES
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`remito_sucursales` (
+  `remito_sucursal` INT NOT NULL AUTO_INCREMENT,
+  `remito_deposito` INT NOT NULL,
+  PRIMARY KEY (`remito_sucursal`, `remito_deposito`),
+  CONSTRAINT `fk_sucursales_has_depositos_depositos1`
+    FOREIGN KEY (`remito_deposito`)
+    REFERENCES `retail_empresa`.`depositos` (`id_deposito`),
+  CONSTRAINT `fk_sucursales_has_depositos_sucursales1`
+    FOREIGN KEY (`remito_sucursal`)
+    REFERENCES `retail_empresa`.`sucursales` (`id_sucursal`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 3
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE INDEX `fk_sucursales_has_depositos_depositos1_idx` ON `retail_empresa`.`remito_sucursales` (`remito_deposito` ASC) VISIBLE;
+
+CREATE INDEX `fk_sucursales_has_depositos_sucursales1_idx` ON `retail_empresa`.`remito_sucursales` (`remito_sucursal` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA REMITO_DETALLE
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`remitos_detalle` (
+  `articulos_id_articulo` VARCHAR(90) NOT NULL,
+  `mov_mercaderia_id_remito` INT NOT NULL,
+  `deposito_origen` VARCHAR(45) NULL DEFAULT NULL,
+  `deposito_destino` VARCHAR(45) NULL DEFAULT NULL,
+  `id_articulos_remito` VARCHAR(45) NULL DEFAULT NULL,
+  PRIMARY KEY (`articulos_id_articulo`, `mov_mercaderia_id_remito`),
+  CONSTRAINT `fk_articulos_has_mov_mercaderia_articulos1`
+    FOREIGN KEY (`articulos_id_articulo`)
+    REFERENCES `retail_empresa`.`articulos` (`id_articulo`),
+  CONSTRAINT `fk_articulos_has_mov_mercaderia_mov_mercaderia1`
+    FOREIGN KEY (`mov_mercaderia_id_remito`)
+    REFERENCES `retail_empresa`.`mov_mercaderia` (`id_remito`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+CREATE INDEX `fk_articulos_has_mov_mercaderia_mov_mercaderia1_idx` ON `retail_empresa`.`remitos_detalle` (`mov_mercaderia_id_remito` ASC) VISIBLE;
+
+CREATE INDEX `fk_articulos_has_mov_mercaderia_articulos1_idx` ON `retail_empresa`.`remitos_detalle` (`articulos_id_articulo` ASC) VISIBLE;
+
+
+-- -----------------------------------------------------
+-- CREAR TABLA UPDATE_LOGS
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`update_logs` (
+  `idlog` INT NOT NULL AUTO_INCREMENT,
+  `usuario` VARCHAR(200) NULL DEFAULT NULL,
+  `fecha` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  `sucursal_modify` VARCHAR(200) NULL DEFAULT NULL,
+  PRIMARY KEY (`idlog`))
+ENGINE = InnoDB
+AUTO_INCREMENT = 3
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+USE `retail_empresa` ;
+
+-- -----------------------------------------------------
+-- VISTA `retail_empresa`.`clientes_con_mail`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`clientes_con_mail` (`id_cliente` INT, `nombre` INT, `email` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`clientes_con_mail_1`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`clientes_con_mail_1` (`id_cliente` INT, `nombre` INT, `email` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`clientes_sin_email`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`clientes_sin_email` (`id_cliente` INT, `sin_mail` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`movimientos_entregados_por_origen`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`movimientos_entregados_por_origen` (`id_remito` INT, `remitos_entregados` INT, `origen` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`vista_articulos_outlet`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`vista_articulos_outlet` (`id_articulo` INT, `art_outlet` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`vista_prueba`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`vista_prueba` (`id_factura` INT);
+
+-- -----------------------------------------------------
+-- VISTA table for view `retail_empresa`.`vista_venta_cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `retail_empresa`.`vista_venta_cliente` (`Ventas_por_cliente` INT);
+
+-- -----------------------------------------------------
+-- procedure SP_Eliminar_1
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_Eliminar_1`(IN id int)
+begin 
+delete from cliente where id_cliente=id;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure SP_INSERTAR_Cliente
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERTAR_Cliente`(
+`_id_cliente`				    int,
+`_nombre`					 	VARCHAR(30),
+`_apellido`						CHAR(60),
+`_telefono`			 			INT,
+`_email`					 	VARCHAR(80)		
+)
+BEGIN
+   
+   INSERT INTO cliente
+        (id_cliente,nombre,apellido,telefono,email)
+    values
+        (_id_cliente, _nombre, _apellido, _telefono, _email);
+        
+   select LAST_INSERT_ID() as ultimo_id;
+        
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- function beneficio_costo_pvp
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` FUNCTION `beneficio_costo_pvp`(costo INT, pvp INT) RETURNS int
+    READS SQL DATA
+BEGIN
+  DECLARE beneficio INT;
+    SET beneficio = pvp - costo;
+    RETURN beneficio; 
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- function numeros_letras
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` FUNCTION `numeros_letras`(letra varchar(90)) RETURNS int
+    READS SQL DATA
+BEGIN
+	declare numero int;
+    select count(*) into numero from articulos where marca like concat('%',letra,'%');
+    return numero;
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure sp_ordenar
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ordenar`(IN buscar VARCHAR(20), IN tipo VARCHAR(5))
+BEGIN
+    
+    SET @order_type = (tipo);
+    
+    IF @order_type = 'DESC' OR @order_type = 'ASC' THEN
+		SET @expression = CONCAT('SELECT * FROM articulos ORDER BY ', @sql_order,' ', @order_type);
+        
+        PREPARE ordered_query FROM @expression;
+		EXECUTE ordered_query;
+		DEALLOCATE PREPARE ordered_query;
+	ELSE 
+		SELECT 'Error: Ingrese nuevamente los campos' AS 'Error' FROM dual;
+	END IF;
+     
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- function status_stock
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` FUNCTION `status_stock`(stock int) RETURNS varchar(30) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+declare tipo varchar(30);
+
+case
+ when stock<15 then
+ set tipo='bajo';
+ when stock<30 then
+ set tipo='medio';
+ else
+ set tipo='alto';
+end case;
+
+RETURN tipo;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- function tiempo_diferencia
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE DEFINER=`root`@`localhost` FUNCTION `tiempo_diferencia`(fecha_de_compra date, fecha_ingreso date) RETURNS varchar(200) CHARSET utf8mb4
+    READS SQL DATA
+BEGIN
+		declare diferencia varchar (60);
+		declare resultado varchar(200);
+		set diferencia = datediff(fecha_de_compra,fecha_ingreso);
+		
+        if diferencia is null then
+		set resultado = 'No tiene fecha';
+        
+        else 
+		set resultado = concat( diferencia,' ','días');
+        
+    end if;
+    
+    return resultado;
+
+
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`clientes_con_mail`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`clientes_con_mail`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`clientes_con_mail` AS select `retail_empresa`.`cliente`.`id_cliente` AS `id_cliente`,`retail_empresa`.`cliente`.`nombre` AS `nombre`,`retail_empresa`.`cliente`.`email` AS `email` from `retail_empresa`.`cliente` where (`retail_empresa`.`cliente`.`email` like '%a%') order by `retail_empresa`.`cliente`.`email` desc;
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`clientes_con_mail_1`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`clientes_con_mail_1`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`clientes_con_mail_1` AS select `retail_empresa`.`cliente`.`id_cliente` AS `id_cliente`,`retail_empresa`.`cliente`.`nombre` AS `nombre`,`retail_empresa`.`cliente`.`email` AS `email` from `retail_empresa`.`cliente` where (`retail_empresa`.`cliente`.`email` like '%a%') order by `retail_empresa`.`cliente`.`id_cliente` desc;
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`clientes_sin_email`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`clientes_sin_email`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`clientes_sin_email` AS select `retail_empresa`.`cliente`.`id_cliente` AS `id_cliente`,`retail_empresa`.`cliente`.`nombre` AS `sin_mail` from `retail_empresa`.`cliente` where (`retail_empresa`.`cliente`.`email` is null);
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`movimientos_entregados_por_origen`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`movimientos_entregados_por_origen`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`movimientos_entregados_por_origen` AS select `retail_empresa`.`mov_mercaderia`.`id_remito` AS `id_remito`,`retail_empresa`.`mov_mercaderia`.`estado` AS `remitos_entregados`,`retail_empresa`.`mov_mercaderia`.`id_deposito` AS `origen` from `retail_empresa`.`mov_mercaderia` where (`retail_empresa`.`mov_mercaderia`.`estado` like 'Recibido');
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`vista_articulos_outlet`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`vista_articulos_outlet`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`vista_articulos_outlet` AS select `retail_empresa`.`articulos`.`id_articulo` AS `id_articulo`,`retail_empresa`.`articulos`.`outlet` AS `art_outlet` from `retail_empresa`.`articulos` where (`retail_empresa`.`articulos`.`outlet` like 'si');
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`vista_prueba`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`vista_prueba`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`vista_prueba` AS select `retail_empresa`.`venta`.`id_factura` AS `id_factura` from (`retail_empresa`.`venta` join `retail_empresa`.`cliente` on((`retail_empresa`.`venta`.`id_factura` = `retail_empresa`.`cliente`.`id_cliente`)));
+
+-- -----------------------------------------------------
+-- View `retail_empresa`.`vista_venta_cliente`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `retail_empresa`.`vista_venta_cliente`;
+USE `retail_empresa`;
+CREATE  OR REPLACE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `retail_empresa`.`vista_venta_cliente` AS select `retail_empresa`.`venta`.`id_factura` AS `Ventas_por_cliente` from (`retail_empresa`.`venta` join `retail_empresa`.`cliente` on((`retail_empresa`.`venta`.`id_factura` = `retail_empresa`.`cliente`.`id_cliente`)));
+USE `retail_empresa`;
+
+DELIMITER $$
+USE `retail_empresa`$$
+CREATE
+DEFINER=`root`@`localhost`
+TRIGGER `retail_empresa`.`log_tabla_articulos_borrar`
+BEFORE DELETE ON `retail_empresa`.`articulos`
+FOR EACH ROW
+begin
+
+insert into acciones(accion)
+
+value (concat ('Se borro un nuevo Articulo de marca   ',old.marca, '  y id  ', old.id_articulo));
+
+END$$
+
+USE `retail_empresa`$$
+CREATE
+DEFINER=`root`@`localhost`
+TRIGGER `retail_empresa`.`before_update`
+BEFORE UPDATE ON `retail_empresa`.`sucursales`
+FOR EACH ROW
+begin
+	insert into update_logs
+    values
+    (null,
+    user(),
+    now(),
+    concat_ws('-',old.id_sucursal,old.id_deposito));
+    
+end$$
+
+
+DELIMITER ;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
